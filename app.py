@@ -1,11 +1,6 @@
+import streamlit as st
 from g4f.client import Client
 import time
-from pathlib import Path
-
-def obter_assuntos_usuario():
-    """Solicita e retorna os assuntos do usuário."""
-    print("Digite os tópicos que deseja resumir (separados por vírgula ou ponto e vírgula):")
-    return input("> ").strip()
 
 def formatar_prompt(assuntos):
     """Gera o prompt estruturado para a API."""
@@ -42,44 +37,49 @@ def gerar_resumo(prompt):
         )
         return response.choices[0].message.content
     except Exception as e:
-        print(f"\nErro ao conectar com a API: {e}")
+        st.error(f"Erro ao conectar com a API: {e}")
         return None
 
-def salvar_resumo(conteudo, nome_arquivo="resumo.md"):
-    """Salva o conteúdo em um arquivo com tratamento de erros."""
-    try:
-        caminho = Path(nome_arquivo)
-        caminho.write_text(conteudo, encoding='utf-8')
-        print(f"\n✔ Resumo salvo com sucesso em: {caminho.absolute()}")
-    except IOError as e:
-        print(f"\n✖ Erro ao salvar arquivo: {e}")
-
 def main():
-    """Função principal do programa."""
-    print("\n" + "="*50)
-    print(" GERADOR DE RESUMOS AUTOMATIZADO ".center(50, "="))
-    print("="*50 + "\n")
+    st.set_page_config(page_title="Gerador de Resumos Automatizado", page_icon="📝")
     
-    assuntos = obter_assuntos_usuario()
+    st.title("📝 Gerador de Resumos Automatizado")
+    st.markdown("---")
     
-    if not assuntos:
-        print("Nenhum tópico fornecido. Encerrando...")
-        return
+    with st.expander("ℹ️ Como usar"):
+        st.write("""
+        1. Digite os tópicos que deseja resumir (separados por vírgula ou ponto e vírgula)
+        2. Clique no botão 'Gerar Resumo'
+        3. Aguarde o processamento
+        4. Visualize o resultado
+        """)
     
-    print("\n⏳ Processando sua solicitação...")
-    inicio = time.time()
+    assuntos = st.text_area(
+        "Digite os tópicos que deseja resumir:",
+        placeholder="Ex: Inteligência Artificial, Machine Learning, Deep Learning"
+    )
     
-    prompt = formatar_prompt(assuntos)
-    resumo = gerar_resumo(prompt)
-    
-    if resumo:
-        print("\n" + " RESULTADO ".center(50, "=") + "\n")
-        print(resumo)
-        salvar_resumo(resumo)
-    else:
-        print("Não foi possível gerar o resumo.")
-    
-    print(f"\nTempo total: {time.time() - inicio:.2f} segundos")
+    if st.button("Gerar Resumo", type="primary"):
+        if not assuntos.strip():
+            st.warning("Por favor, insira pelo menos um tópico para gerar o resumo.")
+            return
+        
+        with st.spinner("⏳ Processando sua solicitação..."):
+            inicio = time.time()
+            
+            prompt = formatar_prompt(assuntos)
+            resumo = gerar_resumo(prompt)
+            
+            if resumo:
+                st.success("Resumo gerado com sucesso!")
+                st.markdown("---")
+                st.subheader("Resultado")
+                st.markdown(resumo)
+                
+                st.markdown("---")
+                st.write(f"⏱️ Tempo total: {time.time() - inicio:.2f} segundos")
+            else:
+                st.error("Não foi possível gerar o resumo.")
 
 if __name__ == "__main__":
     main()
