@@ -41,9 +41,9 @@ def gerar_resumo(prompt):
         return None
 
 def main():
-    st.set_page_config(page_title="Gerador de Resumos Automatizado", page_icon="📝")
+    st.set_page_config(page_title="Estudo Preguiçoso", page_icon="📝")
     
-    st.title("📝 Gerador de Resumos Automatizado")
+    st.title("📝 Estudo Preguiçoso")
     st.markdown("---")
     
     with st.expander("ℹ️ Como usar"):
